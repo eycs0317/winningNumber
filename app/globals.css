@@ -1,26 +1,216 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Styling for the Wheel Picker Container */
+.wheel-picker-container {
+  /* Set fixed height and positioning context */
+  position: relative;
+  width: 250px;
+  margin: 20px auto;
+  user-select: none;
+  /* Crucial for centering: The container is the full height of the visible area */
+  border: 1px solid #ddd;
+  overflow: hidden; /* Ensures spin-button-overlay is clipped if styled incorrectly */
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.wheel-items {
+  /* This is the scrolling viewport */
+  height: 100%; /* Take up the full height of the container */
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  /* Background should be transparent or match the button overlay's background */
+  background: #fdfdfd;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Hide scrollbar for Webkit browsers */
+.wheel-items::-webkit-scrollbar {
+  display: none;
+}
+
+.wheel-item {
+  text-align: center;
+  font-size: 1.2rem;
+  transition: opacity 0.2s, font-weight 0.2s;
+  color: #666;
+  /* Make sure this height matches itemHeight in the TSX component (40px) */
+  height: 40px;
+}
+
+/* --- Spin Button Overlay --- */
+
+.spin-button-overlay {
+  /* Position the overlay over the entire wheel picker */
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* Center the button using flexbox */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* Background to obscure the items passing under the button */
+  background: linear-gradient(to bottom,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(255, 255, 255, 0.2) 40%,
+    rgba(255, 255, 255, 0.2) 60%,
+    rgba(255, 255, 255, 0.9) 100%
+  );
+  pointer-events: none; /* Allow events to pass through to the button */
+}
+
+.spin-button {
+  /* Style the button itself */
+  pointer-events: all; /* Make the button clickable */
+  padding: 10px 20px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: white;
+  background-color: #0070f3;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s;
+}
+
+.spin-button:hover:not(:disabled) {
+  background-color: #005bb5;
+}
+
+.spin-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+
+
+/* --- 3D Scene Setup --- */
+.roulette-scene {
+  /* Establish a perspective for 3D effect */
+  perspective: 1000px;
+  width: 400px; /* Adjust based on your calculated cylinder radius */
+  height: 200px;
+  margin: 50px auto;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* --- The Rotating Wheel --- */
+.roulette-wheel {
+  /* Set the transform style to preserve 3D space for children */
+  transform-style: preserve-3d;
+  position: absolute;
+  /* Start the wheel off-center so the middle is visible */
+  transform: translateZ(-300px) rotateY(0deg);
+  /* The size of the wheel should enclose the cylinder */
+  width: 100%;
+  height: 100%;
+}
+
+/* --- Individual Item Faces --- */
+.wheel-item-face {
+  position: absolute;
+  /* Item dimensions must match the JS calculation (itemWidth = 100px) */
+  width: 100px;
+  height: 50px;
+  line-height: 50px;
+  text-align: center;
+  border: 1px solid #ccc;
+  background-color: #f8f8f8;
+  color: #333;
+  font-weight: bold;
+
+  /* Center the face in its container */
+  left: 50%;
+  top: 50%;
+  margin-left: -50px; /* -half width */
+  margin-top: -25px; /* -half height */
+
+  /* Ensure item's children are rendered in 3D */
+  backface-visibility: hidden;
+  transition: opacity 0.3s;
+}
+
+/* --- Pointer and Button --- */
+.roulette-pointer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) translateY(-100px); /* Position above the center */
+    font-size: 2rem;
+    color: red;
+    z-index: 100;
+}
+
+.spin-button-area {
+    position: absolute;
+    z-index: 50;
+    /* Center it visually */
+}
+
+.spin-button {
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border-radius: 50px;
+    /* ... other button styles ... */
+}
+
+/* Casino Styles */
+@layer utilities {
+  @keyframes tile-spin {
+    0% { transform: rotateY(0deg); }
+    100% { transform: rotateY(360deg); }
+  }
+
+  @keyframes tile-flash {
+    0%, 100% { box-shadow: 0 0 20px gold; }
+    50% { box-shadow: 0 0 40px red; }
+  }
+
+  .casino-tile {
+    @apply bg-black text-yellow-300 font-bold rounded-xl p-6 m-3 shadow-[0_0_20px_rgba(255,215,0,0.6)] border-2 border-yellow-500;
+    background: linear-gradient(145deg, #111, #000);
+  }
+
+  .casino-spin {
+    animation: tile-spin 0.5s linear infinite;
+  }
+
+  .casino-flash {
+    animation: tile-flash 0.3s ease-in-out infinite;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Roulette Styles */
+@layer utilities {
+  .roulette-container {
+    @apply relative w-80 h-80 rounded-full border-4 border-gray-700 overflow-hidden flex items-center justify-center;
+  }
+
+  .roulette-segment {
+    @apply absolute w-1/2 h-1/2 origin-bottom text-white font-bold flex items-center justify-center;
+  }
+
+  .roulette-highlight {
+    animation: roulette-flash 0.3s infinite;
+  }
+
+  @keyframes roulette-flash {
+    0%, 100% { filter: brightness(1.5); }
+    50% { filter: brightness(0.8); }
+  }
+
+  @keyframes roulette-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .roulette-spin {
+    animation: roulette-spin 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
 }
+
