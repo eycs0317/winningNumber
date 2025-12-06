@@ -1,7 +1,13 @@
 [
   {
     "id": 1,
-    "inventory": 1
+    "inventory": 0,
+    "item": "Teddy Bear"
+  },
+  {
+    "id": 2,
+    "inventory": 0,
+    "item": "Chocolate Box"
   }
 
 ]

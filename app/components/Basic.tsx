@@ -1,85 +1,60 @@
 'use client';
 
 import { useState, useEffect } from "react";
-
-interface BaseAward {
-  inventory: number;
-  id: number;
-}
-
-interface ItemAward extends BaseAward {
-  item?: string;
-}
+import { shuffleArray } from "../utils/shuffleArray";
 
 interface BasicProps {
   count: number;
-  isWon?: boolean;
-  award: ItemAward[];
   uiStyle?: 'default' | 'casino' | 'roulette';
 }
 
-function shuffleArray<T>(array: T[]): T[] {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-}
-
-export default function Basic({ count, award, uiStyle = 'default' }: BasicProps) {
+export default function Basic({ count, uiStyle = 'default' }: BasicProps) {
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
   const [userWon, setUserWon] = useState<boolean | null>(null);
-  const [shuffledAwards, setShuffledAwards] = useState<
-    { id: number; text: string; isAvailable: boolean, isDummy: boolean }[]
-  >([]);
-  console.log('shuffledAwards', shuffledAwards);
+  const [shuffledAwards, setShuffledAwards] = useState<{ id: number; text: string; isAvailable: boolean, isDummy:boolean }[]>([]);
+  const [singleGiftMode, setSingleGiftMode] = useState<boolean>();
 
-  // Determine mode once from props: whether items are present (item-name mode)
-  const singleGiftMode = !award[0]?.item;
-// console.log('singleGiftMode at top', singleGiftMode);
-// useEffect(() => {
-//   fetch("/api/awards")
-//     .then(res => res.json())
-//     .then(data => setShuffledAwards(shuffleArray(data)));
-// }, []);
+useEffect(() => {
+  fetch("/api/awards")
+    .then(res => res.json())
+    .then(data => {
 
-// onLoad with award prop
-  useEffect(() => {
-    const items = Array.from({ length: count }, (_, index) => {
+      const items = Array.from({ length: count }, (_, index) => {
+        const a = data[index];
+        let label = "";
+        let isDummy;
+        const firstIndexItem = !data[0]?.item;
+        setSingleGiftMode(firstIndexItem);
 
-      const a = award[index];
-      let label = "";
-      let isDummy;
-
-      if (singleGiftMode) {
-        // case 1: no item mode → use index number
-        label = `${index + 1}`;
-        if(index === 0){
+        if (firstIndexItem) {
+          // case 1: no item mode → use index number
+          label = `${index + 1}`;
+          if(index === 0){
+            isDummy = false;
+          } else {
+            isDummy = true;
+          }
+        } else if (!singleGiftMode && a?.item) {
+          // case 2: 'x' item mode'
+          label = a.item;
           isDummy = false;
         } else {
+          // case 3: 'X' item mode (no item name)'
+          label = "X";
           isDummy = true;
         }
-      } else if (!singleGiftMode && a?.item) {
-        // case 2: 'x' item mode'
-        label = a.item;
-        isDummy = false;
-      } else {
-        // case 3: 'X' item mode (no item name)'
-        label = "X";
-        isDummy = true;
-      }
 
-      return {
-        id: a?.id ?? index + 1,
-        text: label,
-        isAvailable: (a?.inventory ?? 0) > 0,
-        isDummy
-      };
+        return {
+          id: a?.id ?? index + 1,
+          text: label,
+          isAvailable: (a?.inventory ?? 0) > 0,
+          isDummy
+        };
     });
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
+        // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
     setShuffledAwards(shuffleArray(items));
-  }, [count, award ]); // recompute if count/award change
+    });
+}, []);
 
   const mappedItems = shuffledAwards.map((item) => {
     const isAvailable = item.isAvailable;
@@ -104,39 +79,17 @@ export default function Basic({ count, award, uiStyle = 'default' }: BasicProps)
       </div>
     );
   });
-// const handleOnClick = async () => {
-//   const res = await fetch("/api/draw", { method: "POST" });
-//   const result = await res.json();
 
-//   setSelectedNumber(result.id);
-//   setUserWon(result.isWinner);
-// };
+  const handleOnClick = async () => {
+    const res = await fetch("/api/draw", {
+    method: "POST",
+    headers: { "Content-Type": "application/json"},
+    body: JSON.stringify({
+    shuffledAwards
+  }) });
 
-// onclick function when award prop pass in
-  const handleOnClick = () => {
-  if (shuffledAwards.length === 0) return;
-
-  let pick = null;
-
-  while (pick === null) {
-    const randomIndex = Math.floor(Math.random() * shuffledAwards.length);
-    const candidate = shuffledAwards[randomIndex];
-
-    // Dummy → always allowed (lose)
-    if (candidate.isDummy) {
-      pick = candidate;
-      break;
-    }
-
-    // Real prize → allowed only if in stock
-    if (!candidate.isDummy && candidate.isAvailable) {
-      pick = candidate;
-      break;
-    }
-
-    // Otherwise → keep looping
-  }
-
+  const result = await res.json();
+  const pick = result.pick;
   setSelectedNumber(pick.id);
   setUserWon(!pick.isDummy && pick.isAvailable); // only real & available = win
 };
