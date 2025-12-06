@@ -38,7 +38,7 @@ return (
       /> */}
       <Basic
         uiStyle="default"
-        count={7}
+        count={3}
       />
     </main>
   );
