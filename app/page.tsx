@@ -10,21 +10,6 @@ import Basic from "./components/Basic";
 
 export default function HomePage() {
 
-//   const totalSlices = 4;
-// const itemsList = ['a', 'b',];
-
-// Determine the winning index (e.g., from an API call, or just fixed for testing)
-// const winningGoalIndex = 1; // Item 'd' is the winner
-
-// const handleSpinFinished = (landedIndex: number, didWin: boolean) => {
-//   const landedItem = itemsList[landedIndex];
-
-//   if (didWin) {
-//     alert(`WIN! You landed on Item ${landedItem} (Index ${landedIndex}).`);
-//   } else {
-//     alert(`LOSE. Landed on Item ${landedItem} (Index ${landedIndex}). The winner was Item ${itemsList[winningGoalIndex]}.`);
-//   }
-// };
 
 return (
     <main>

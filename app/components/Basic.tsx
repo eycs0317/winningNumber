@@ -54,11 +54,9 @@ useEffect(() => {
     <div>
       <h1>Basic Component</h1>
       <div className="flex flex-wrap">{mappedItems}</div>
-
       <button className="text-xl mt-4 px-4 py-2 bg-blue-600 text-white rounded" onClick={handleOnClick}>
         Click Me
       </button>
-
       <p>Selected Number: {selectedNumber}</p>
       {userWon !== null && <p>{userWon ? "You Won!" : "You Lost."}</p>}
     </div>
