@@ -12,22 +12,31 @@ interface BasicProps {
 }
 
 export default function Basic({ count, uiStyle = 'default' }: BasicProps) {
+
+  // State to hold randomly selected number for the win
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
+  // State to hold whether the user won
   const [userWon, setUserWon] = useState<boolean | null>(null);
+  // State to hold shuffled awards
   const [shuffledAwards, setShuffledAwards] = useState<{ id: number; text: string; isAvailable: boolean, isDummy:boolean }[]>([]);
+  // State to determine if single gift mode is active, ex: award: [ inventory: 1 ]
   const [singleGiftMode, setSingleGiftMode] = useState<boolean>();
 
+// OnLoad fetch awards data from api
 useEffect(() => {
   fetch("/api/awards")
     .then(res => res.json())
     .then(data => {
+      // Transform awards data based on count and if data has item name.
       const { items, singleGiftMode } = transformAwards(data, count);
         setSingleGiftMode(singleGiftMode);
         setShuffledAwards(shuffleArray(items));
     });
 }, []);
 
+// Map through shuffled awards to render items
   const mappedItems = shuffledAwards.map((item) => {
+    // Get CSS classes based on availability, selection, and mode
     const classes = getItemClass(
       item.isAvailable,
       selectedNumber === item.id,
@@ -41,9 +50,10 @@ useEffect(() => {
     );
   });
 
+// Handle click event to draw an award
   const handleOnClick = async () => {
+    // Call drawAward utility with shuffled awards to get the winning pick and update inventory.
   const result = await drawAward(shuffledAwards);
-
   const pick = result.pick;
   setSelectedNumber(pick.id);
   setUserWon(!pick.isDummy && pick.isAvailable); // only real & available = win
@@ -63,6 +73,3 @@ useEffect(() => {
   );
 }
 
-//  onload call api to get awards data
-// basic on the count to render items and add dummy if necessary
-//when user click, call api to get a random item and update inventory and return result

@@ -8,9 +8,6 @@ export async function POST(req: Request) {
   const awards = JSON.parse(fs.readFileSync(filePath, "utf8"));
   const body = await req.json();
   const shuffledAwards = body.shuffledAwards
-  const shuffledAwardsLength = shuffledAwards.length
-  console.log('awards', awards)
-  console.log('shuffledAwards', shuffledAwards)
 
   const synced = shuffledAwards.map((item: any) => {
   const serverItem = awards.find((a: any) => a.id === item.id);

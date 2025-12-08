@@ -1,10 +1,7 @@
 'use client';
-// app/page.tsx (Example Usage)
-// import WheelPicker from "./components/WheelPicker";
-// import RouletteWheel from "./components/RouleeteWheel";
-import WheelSpinner from "./components/WheelSpinner";
-// import WheelSpinner01 from "./components/WheelSpinner01";
-// ... sampleItems remains the same ...
+
+// import WheelSpinner from "./components/WheelSpinner";
+
 import Basic from "./components/Basic";
 
 
