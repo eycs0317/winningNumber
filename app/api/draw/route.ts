@@ -3,11 +3,14 @@ import fs from "fs";
 import path from "path";
 
 
-export async function POST(req: Request) {
-  const filePath = path.join(process.cwd(), "data", "awards.json");
-  const awards = JSON.parse(fs.readFileSync(filePath, "utf8"));
-  const body = await req.json();
+export async function POST(request: Request) {
+
+  const body = await request.json();
   const shuffledAwards = body.shuffledAwards
+  const name = body.jsonFileName
+
+  const filePath = path.join(process.cwd(), "data", `${name}.json`);
+  const awards = JSON.parse(fs.readFileSync(filePath, "utf8"));
 
   const synced = shuffledAwards.map((item: any) => {
   const serverItem = awards.find((a: any) => a.id === item.id);

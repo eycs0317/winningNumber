@@ -19,8 +19,8 @@ return (
         onFinish={handleSpinFinished}
       /> */}
       <Basic
-        uiStyle="default"
-        count={3}
+        count={4}
+        jsonFileName={"dummyData02"}
       />
     </main>
   );

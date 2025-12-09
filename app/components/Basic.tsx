@@ -8,10 +8,10 @@ import { drawAward } from "../utils/draw";
 
 interface BasicProps {
   count: number;
-  uiStyle?: 'default' | 'casino' | 'roulette';
+  jsonFileName: string;
 }
 
-export default function Basic({ count, uiStyle = 'default' }: BasicProps) {
+export default function Basic({ count = 4, jsonFileName = "dummyData01" }: BasicProps) {
 
   // State to hold randomly selected number for the win
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
@@ -24,7 +24,7 @@ export default function Basic({ count, uiStyle = 'default' }: BasicProps) {
 
 // OnLoad fetch awards data from api
 useEffect(() => {
-  fetch("/api/awards")
+  fetch(`api/awards?jsonFileName=${jsonFileName}`)
     .then(res => res.json())
     .then(data => {
       // Transform awards data based on count and if data has item name.
@@ -53,7 +53,7 @@ useEffect(() => {
 // Handle click event to draw an award
   const handleOnClick = async () => {
     // Call drawAward utility with shuffled awards to get the winning pick and update inventory.
-  const result = await drawAward(shuffledAwards);
+  const result = await drawAward(shuffledAwards, jsonFileName);
   const pick = result.pick;
   setSelectedNumber(pick.id);
   setUserWon(!pick.isDummy && pick.isAvailable); // only real & available = win
