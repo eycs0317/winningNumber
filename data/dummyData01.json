@@ -1,8 +1,9 @@
-[
-  {
-    "id": 1,
-    "inventory": 1
-  }
-
-
-]
+{
+  "count": 4,
+  "awards": [
+    {
+      "id": 1,
+      "inventory": 1
+    }
+  ]
+}

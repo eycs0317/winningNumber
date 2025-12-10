@@ -19,8 +19,8 @@ return (
         onFinish={handleSpinFinished}
       /> */}
       <Basic
-        count={4}
-        jsonFileName={"dummyData02"}
+        // count={4}
+        // uid={"dummyData01"}
       />
     </main>
   );

@@ -1,11 +1,15 @@
-[
-  {
-    "id": 1,
-    "inventory": 1,
-    "item": "TV"
-  },
-  {"id": 2,
-    "inventory": 1,
-    "item": "$$$"
-  }
-]
+{
+  "count": 4,
+  "awards": [
+    {
+      "id": 1,
+      "inventory": 1,
+      "item": "TV"
+    },
+    {
+      "id": 2,
+      "inventory": 10,
+      "item": "Money"
+    }
+  ]
+}
