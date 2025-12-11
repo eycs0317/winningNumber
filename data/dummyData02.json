@@ -1,9 +1,9 @@
 {
-  "count": 3,
+  "count": 4,
   "awards": [
     {
       "id": 1,
-      "inventory": 1,
+      "inventory": 2,
       "item": "TV"
     }
   ]

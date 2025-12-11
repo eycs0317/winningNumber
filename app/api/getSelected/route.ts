@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-
+import getData from "@/app/utils/getData";
 // Define the interface for the data structure you are working with
 interface AwardItem {
   id: number;
@@ -16,26 +16,20 @@ interface AwardData {
 
 export async function POST(request: Request) {
   try {
+
     const body = await request.json();
     const uid: string = body.uid;
 
     // --- 1. Read JSON Data ---
+    const rawData =getData(uid);
+    const awards = rawData.awards
+    const count = rawData.count
+    const selectableIndices: number[] = [];
     const filePath = path.join(process.cwd(), "data", `${uid}.json`);
 
-    // Check if file exists before reading
-    if (!fs.existsSync(filePath)) {
-        return NextResponse.json({ error: `File not found for uid: ${uid}` }, { status: 404 });
-    }
-
-    const fileContent = fs.readFileSync(filePath, "utf8");
-    const json: AwardData = JSON.parse(fileContent);
-    const award = json.awards
-
-  const selectableIndices: number[] = [];
-
-  Array.from({ length: json.count }, (_, index) => {
+  Array.from({ length: count }, (_, index) => {
     // Safely check if the item exists at this index in the shorter 'json.awards' array
-    const awardItem = json.awards[index];
+    const awardItem = awards[index];
 
     // Case 1: The index exists in the 'awards' array
     if (awardItem) {
@@ -58,7 +52,7 @@ export async function POST(request: Request) {
 
     const selectedIndexValue = selectableIndices[randomIndex];
 
-    const pickedAward = award[selectedIndexValue];
+    const pickedAward = awards[selectedIndexValue];
     let winStatus = false;
     if ((pickedAward?.inventory ?? 0) > 0) {
       winStatus = true;
@@ -68,7 +62,7 @@ export async function POST(request: Request) {
       }
 
       // save to json
-      const updatedJsonContent = JSON.stringify(json, null, 2);
+      const updatedJsonContent = JSON.stringify(rawData, null, 2);
       fs.writeFileSync(filePath, updatedJsonContent);
       }
 

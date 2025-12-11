@@ -1,9 +1,6 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { fetchAllData } from "../utils/fetchAllData";
-import { createBase } from "../utils/createBase";
-import { createDisplay } from "../utils/createDisplay";
 interface BasicProps {
   uid?: string;
 }
@@ -23,10 +20,9 @@ type AwardItem = BaseAward | ItemAward;
 export default function Basic({ uid = "dummyData02" }: BasicProps) {
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [count, setCount] = useState<number>();
-  const [awards, setAwards] = useState<AwardItem[]>([]);
   const [baseData, setBaseData] = useState<any>();
   const [displayData, setDisplayData] = useState<any>();
+  const [hasItemNameMode, setHasItemNameMode] = useState<boolean | null>(null);
   const [selectedIndexValue, setSelectedIndexValue] = useState<number>()
   const [userWon, setUserWon] = useState<boolean | null>(null);
 
@@ -34,16 +30,22 @@ useEffect(() => {
   const loadData = async () => {
     try {
       setIsLoading(true)
+      const res = await fetch('/api/onLoad', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ uid }),
+        })
+      if (!res.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const data = await res.json();
 
-      const data = await fetchAllData(uid)
-      const awardsData: AwardItem[] = data.awards
-      const awardsCount: number = data.count ?? 0;
-      const baseResult = createBase({data: awardsData, count: awardsCount});
-      const displayResult = createDisplay(awardsCount);
-      setAwards(awardsData);
-      setCount(awardsCount);
-      setBaseData(baseResult);
-      setDisplayData(displayResult);
+      setBaseData(data.baseResult);
+      setDisplayData(data.displayResult);
+      setHasItemNameMode(data.hasItemNameMode);
+      setIsLoading(false);
 
     }
     catch (error) {
@@ -59,9 +61,11 @@ useEffect(() => {
 const mappedItemsForDisplay = displayData?.map((shuffledIndex: number) => {
     const key = `item-${shuffledIndex}`;
     let classes = ""
+    //The selected from server apply red ring
     const selectedClass = selectedIndexValue === shuffledIndex ? "animate-pulse ring-6 ring-red-400"  : "";
     // without item case
-    if (baseData[0] === "") {
+    if (!hasItemNameMode) {
+      //Only the first item is green, indicate that the only prize that can be won.
       if(shuffledIndex === 0){
         classes = "bg-green-500 text-white font-bold"
       }
@@ -117,7 +121,6 @@ const mappedItemsForDisplay = displayData?.map((shuffledIndex: number) => {
         </button>
       </div>
 
-      {/* <p>Selected Number: {selectedNumber}</p> */}
       <div className='text-center mt-5'>
         {userWon !== null && <p>{userWon ? "You Won!" : "You Lost."}</p>}
       </div>

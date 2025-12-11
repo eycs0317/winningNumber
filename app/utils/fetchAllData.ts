@@ -1,6 +1,6 @@
 export async function fetchAllData(uid : string) {
       try {
-      const response = await fetch('/api/getData', {
+      const response = await fetch('/api/onLoad', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

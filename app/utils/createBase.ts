@@ -17,7 +17,7 @@ interface CreateBaseProps {
   count: number;
 }
 
-export function createBase({ data, count }: CreateBaseProps) {
+export default function createBase({ data, count }: CreateBaseProps) {
 
   // This is the fixed, type-safe check:
   const hasItemName = data.length > 0 && 'item' in data[0] && !!(data[0] as ItemAward).item;
