@@ -20,16 +20,15 @@ interface ItemAward extends BaseAward {
 // The union type for any single item in the data array
 type AwardItem = BaseAward | ItemAward;
 
-export default function Basic({ uid = "dummyData03" }: BasicProps) {
+export default function Basic({ uid = "dummyData02" }: BasicProps) {
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [count, setCount] = useState<number>();
-  // const [data, setData] = useState<any>();
   const [awards, setAwards] = useState<AwardItem[]>([]);
   const [baseData, setBaseData] = useState<any>();
   const [displayData, setDisplayData] = useState<any>();
   const [selectedIndexValue, setSelectedIndexValue] = useState<number>()
-  const [userWon, setUserWon] = useState<boolean>(false);
+  const [userWon, setUserWon] = useState<boolean | null>(null);
 
 useEffect(() => {
   const loadData = async () => {
@@ -68,42 +67,61 @@ const mappedItemsForDisplay = displayData?.map((shuffledIndex: number) => {
       }
 
       return (
-        <div key={key} className={`m-2 p-4 border rounded bg-gray-100 ${classes} ${selectedClass}` }>
+        <li key={key} className={`m-2 p-4 border rounded bg-gray-100 ${classes} ${selectedClass}` }>
           {shuffledIndex + 1}
-        </div>
+        </li>
       );
     } else {
       //With item case
       return (
-        <div key={key} className={`m-2 p-4 border rounded bg-gray-100 ${selectedClass}`}>
+        <li key={key} className={`m-2 p-4 border rounded bg-gray-100 ${selectedClass}`}>
           {baseData ? baseData[shuffledIndex] : "Loading..."}
-        </div>
+        </li>
       );
     }
   });
 
   const handleOnClick = async () => {
-    const res = await fetch('./api/getSelected', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ uid }),
-    });
-    const {selectedIndexValue, winStatus} = await res.json();
-    setSelectedIndexValue(selectedIndexValue);
-    setUserWon(winStatus);
-};
+    setIsLoading(true)
+    try{
+        const res = await fetch('./api/getSelected', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ uid }),
+        });
+        if (!res.ok) {
+          throw new Error('Network response was not ok');
+        }
+
+        const {selectedIndexValue, winStatus} = await res.json();
+        setSelectedIndexValue(selectedIndexValue);
+        setUserWon(winStatus);
+
+      } catch (error) {
+      console.error("Error in data during api/getSelected:", error);
+    }
+      finally {
+        setIsLoading(false);
+      }
+  };
 
   return (
     <div>
-      <h1>Basic Component</h1>
-      <div className="flex flex-wrap">{mappedItemsForDisplay}</div>
-      <button className="text-xl mt-4 px-4 py-2 bg-blue-600 text-white rounded" onClick={handleOnClick}>
-        Click Me
-      </button>
+      <h1 className='text-center p-4 text-2xl'>Basic Component</h1>
+      <div className="flex flex-col items-center border-2 border-gray-300 rounded  max-w-sm mx-auto p-4 mt-4">
+        <ul className="flex flex-wrap">{mappedItemsForDisplay}</ul>
+        <button className="text-xl mt-4 px-4 py-2 bg-blue-600 text-white rounded" onClick={handleOnClick}>
+          Click Me
+        </button>
+      </div>
+
       {/* <p>Selected Number: {selectedNumber}</p> */}
-      {userWon !== null && <p>{userWon ? "You Won!" : "You Lost."}</p>}
+      <div className='text-center mt-5'>
+        {userWon !== null && <p>{userWon ? "You Won!" : "You Lost."}</p>}
+      </div>
+
     </div>
   );
 }
